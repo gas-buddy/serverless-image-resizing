@@ -43,7 +43,7 @@ function from that, the rest of it's architecture we produce via serverless.yaml
 
     Make a rest call to "<endpoint url from deploy output>?key=<dimensions>/<s3-image-path>"
     either via a curl GET, or just pasting it in your browser.
-    For example: "<endpoint url from deploy output>?key=300x300/b/2007/android/hdpi/logo"
+    For example: "<endpoint url from deploy output>?key=300x300/b/2007/android/hdpi/logo.png"
 
 4. (Optional) Restrict resize dimensions
 
