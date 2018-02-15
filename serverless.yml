@@ -8,7 +8,7 @@ provider:
     URL: 'http://gb-images-stg.s3-website-us-east-1.amazonaws.com'
     REGION: 'us-east-1'
   stage: ${opt:stage, 'dev'}
-  region: us-east-1
+  region: ${self:provider.environment.REGION}
 
 # you can add statements to the Lambda function's IAM Role here
   iamRoleStatements:
