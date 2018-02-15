@@ -1,0 +1,66 @@
+service: dynamic-resize
+
+provider:
+  name: aws
+  runtime: nodejs6.10
+  environment:
+    BUCKET: gb-images-stg
+    URL: 'http://gb-images-stg.s3-website-us-east-1.amazonaws.com'
+    REGION: 'us-east-1'
+  stage: ${opt:stage, 'dev'}
+  region: ${self:provider.environment.REGION}
+
+# you can add statements to the Lambda function's IAM Role here
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "s3:ListBucket"
+      Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
+    - Effect: "Allow"
+      Action:
+        - "s3:PutObject"
+      Resource:
+        Fn::Join:
+          - ""
+          - - "arn:aws:s3:::"
+            - "Ref" : "ServerlessDeploymentBucket"
+            - "/*"
+    - Effect: "Allow"
+      Action:
+        - "s3:PutObject"
+      Resource:
+        Fn::Join:
+          - ""
+          - - "arn:aws:s3:::"
+            - "${self:provider.environment.BUCKET}/*"
+    - Effect: "Allow"
+      Action:
+        - "s3:GetObject"
+      Resource:
+        Fn::Join:
+          - ""
+          - - "arn:aws:s3:::"
+            - "${self:provider.environment.BUCKET}/*"
+            - "/*"
+
+package:
+  include:
+    - index.js
+#  exclude:
+#    - docker/**
+
+functions:
+  dynamicResize:
+    handler: index.handler
+    Runtime: nodejs6.10
+    MemorySize: 1536
+    Timeout: 60
+    Environment:
+      Variables:
+        BUCKET: ${self:provider.environment.BUCKET}
+        URL:
+          GetAtt: ImageBucket.WebsiteURL
+    events:
+      - http:
+          method: get
+          path: image

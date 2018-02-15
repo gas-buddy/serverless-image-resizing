@@ -1,0 +1,7 @@
+FROM lambci/lambda:build-nodejs6.10
+
+VOLUME /data
+
+WORKDIR /data
+
+ENTRYPOINT ["/bin/sh"]

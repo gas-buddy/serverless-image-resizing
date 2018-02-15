@@ -1,1 +1,5 @@
-lambda/node_modules
+# package directories
+node_modules
+
+# serverless directories
+.serverless
