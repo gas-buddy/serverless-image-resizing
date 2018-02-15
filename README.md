@@ -9,44 +9,41 @@ function via API Gateway which will resize the image, upload it to S3, and
 redirect the requestor to the resized image. The next request for the resized
 image will be served from S3 directly.
 
+This is a serverless fork of the awslabs example. Though we take only the lambda
+function from that, the rest of it's architecture we produce via serverless.yaml.
+
 ## Usage
 
 1. Build the Lambda function
 
    The Lambda function uses [sharp][sharp] for image resizing which requires
    native extensions. In order to run on Lambda, it must be packaged on Amazon
-   Linux. You can accomplish this in one of two ways:
+   Linux. You can accomplish this as follows:
 
-   - Upload the contents of the `lambda` subdirectory to an [Amazon EC2 instance
-     running Amazon Linux][amazon-linux] and run `npm install`, or
+   ```
+   run-gb-service
+   npm install
+   ```
 
-   - Use the Amazon Linux Docker container image to build the package using your
-     local system. This repo includes Makefile that will download Amazon Linux,
-     install Node.js and developer tools, and build the extensions using Docker.
-     Run `make all`.
+2. Deploy the serverless stack
 
-2. Deploy the CloudFormation stack
+    From the same container in which you built the lambda function, run:
+    ```
+    npm install -g serverless
+    export AWS_ACCESS_KEY_ID=<your dev credentials>
+    export AWS_SECRET_ACCESS_KEY=<your dev credentials>
+    serverless deploy --stage <dev | stage | prod>
+    ```
+    - To view your saved dev credentials, if any, run `cat ~/.aws/credentials`
 
-    Run `bin/deploy` to deploy the CloudFormation stack. It will create a
-    temporary Amazon S3 bucket, package and upload the function, and create the
-    Lambda function, Amazon API Gateway RestApi, and an S3 bucket for images via
-    CloudFormation.
+    Once complete, at the end of the output check the `endpoints:` heading
+    for the url of the API Gateway that performs the dynamic resizing.
 
-    The deployment script requires the [AWS CLI][cli] version 1.11.19 or newer
-    to be installed.
+3. Test the endpoint
 
-3. Test the function
-
-    Upload an image to the S3 bucket and try to resize it via your web browser
-    to different sizes, e.g. with an image uploaded in the bucket called
-    image.png:
-
-    - http://[BucketWebsiteHost]/300x300/path/to/image.png
-    - http://[BucketWebsiteHost]/90x90/path/to/image.png
-    - http://[BucketWebsiteHost]/40x40/path/to/image.png
-
-    You can find the `BucketWebsiteUrl` in the table of outputs displayed on a
-    successful invocation of the deploy script.
+    Make a rest call to "<endpoint url from deploy output>?key=<dimensions>/<s3-image-path>"
+    either via a curl GET, or just pasting it in your browser.
+    For example: "<endpoint url from deploy output>?key=300x300/b/2007/android/hdpi/logo"
 
 4. (Optional) Restrict resize dimensions
 
