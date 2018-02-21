@@ -5,7 +5,7 @@ provider:
   runtime: nodejs6.10
   environment:
     BUCKET: gb-images-stg
-    URL: 'http://gb-images-stg.s3-website-us-east-1.amazonaws.com'
+    URL: 'http://images.stage.gasbuddy.io'
     REGION: 'us-east-1'
   stage: ${opt:stage, 'dev'}
   region: ${self:provider.environment.REGION}

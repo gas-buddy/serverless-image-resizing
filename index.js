@@ -43,11 +43,17 @@ exports.handler = function(event, context, callback) {
         Bucket: BUCKET,
         ContentType: 'image/png',
         Key: key,
+        CacheControl: 'max-age=14400', // 4 hours
       }).promise()
     )
     .then(() => callback(null, {
         statusCode: '301',
-        headers: {'location': `${URL}/${key}`},
+        headers: {
+          'location': `${URL}/${key}`,
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        },
         body: '',
       })
     )
