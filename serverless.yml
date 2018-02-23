@@ -2,10 +2,10 @@ service: dynamic-resize
 
 custom:
   stage:
-    url: 'http://images.stage.gasbuddy.io'
+    url: 'https://images.stage.gasbuddy.io'
     bucket: gb-images-stg
   prod:
-    url: 'http://images.gasbuddy.io'
+    url: 'https://images.gasbuddy.io'
     bucket: ''
 
 provider:
