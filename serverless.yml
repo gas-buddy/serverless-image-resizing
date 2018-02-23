@@ -1,13 +1,21 @@
 service: dynamic-resize
 
+custom:
+  stage:
+    url: 'http://images.stage.gasbuddy.io'
+    bucket: gb-images-stg
+  prod:
+    url: 'http://images.gasbuddy.io'
+    bucket: ''
+
 provider:
   name: aws
   runtime: nodejs6.10
   environment:
-    BUCKET: gb-images-stg
-    URL: 'http://images.stage.gasbuddy.io'
+    BUCKET: ${self:custom.${self:provider.stage}.bucket}
+    URL: ${self:custom.${self:provider.stage}.url}
     REGION: 'us-east-1'
-  stage: ${opt:stage, 'dev'}
+  stage: ${opt:stage, 'stage'}
   region: ${self:provider.environment.REGION}
 
 # you can add statements to the Lambda function's IAM Role here

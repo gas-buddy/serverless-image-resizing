@@ -8,6 +8,7 @@ const S3 = new AWS.S3({
 const BUCKET = process.env.BUCKET;
 const URL = process.env.URL;
 const ALLOWED_DIMENSIONS = new Set();
+const MAX_AGE = 14400; // seconds = 240 minutes = 4 hours
 
 if (process.env.ALLOWED_DIMENSIONS) {
   const dimensions = process.env.ALLOWED_DIMENSIONS.split(/\s*,\s*/);
@@ -24,7 +25,7 @@ exports.handler = function handler(event, context, callback) {
 
   if (ALLOWED_DIMENSIONS.size > 0 && !ALLOWED_DIMENSIONS.has(dimensions)) {
     callback(null, {
-      statusCode: '403',
+      statusCode: '400',
       headers: {},
       body: '',
     });
@@ -43,7 +44,7 @@ exports.handler = function handler(event, context, callback) {
       Bucket: BUCKET,
       ContentType: 'image/png',
       Key: key,
-      CacheControl: 'max-age=14400', // 4 hours
+      CacheControl: `max-age=${MAX_AGE}`,
     }).promise()
     )
     .then(() => callback(null, {
