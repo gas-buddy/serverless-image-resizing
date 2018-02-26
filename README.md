@@ -32,7 +32,7 @@ function from that, the rest of it's architecture we produce via serverless.yaml
     npm install -g serverless
     export AWS_ACCESS_KEY_ID=<your dev credentials>
     export AWS_SECRET_ACCESS_KEY=<your dev credentials>
-    serverless deploy --stage <dev | stage | prod>
+    serverless deploy --stage <stage | prod>
     ```
     - To view your saved dev credentials, if any, run `cat ~/.aws/credentials`
 
