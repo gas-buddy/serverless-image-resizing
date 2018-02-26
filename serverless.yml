@@ -6,7 +6,7 @@ custom:
     bucket: gb-images-stg
   prod:
     url: 'https://images.gasbuddy.io'
-    bucket: ''
+    bucket: gb-images-prod
 
 provider:
   name: aws
