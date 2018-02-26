@@ -1,30 +1,27 @@
 service: dynamic-resize
 
+custom:
+  stage:
+    url: 'https://images.stage.gasbuddy.io'
+    bucket: gb-images-stg
+  prod:
+    url: 'https://images.gasbuddy.io'
+    bucket: gb-images-prod
+
 provider:
   name: aws
   runtime: nodejs6.10
   environment:
-    BUCKET: gb-images-stg
-    URL: 'http://gb-images-stg.s3-website-us-east-1.amazonaws.com'
+    BUCKET: ${self:custom.${self:provider.stage}.bucket}
+    URL: ${self:custom.${self:provider.stage}.url}
     REGION: 'us-east-1'
-  stage: ${opt:stage, 'dev'}
+  deploymentBucket:
+    name: serverless-${self:provider.stage}-deployment-bucket
+  stage: ${opt:stage, 'stage'}
   region: ${self:provider.environment.REGION}
 
 # you can add statements to the Lambda function's IAM Role here
   iamRoleStatements:
-    - Effect: "Allow"
-      Action:
-        - "s3:ListBucket"
-      Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
-    - Effect: "Allow"
-      Action:
-        - "s3:PutObject"
-      Resource:
-        Fn::Join:
-          - ""
-          - - "arn:aws:s3:::"
-            - "Ref" : "ServerlessDeploymentBucket"
-            - "/*"
     - Effect: "Allow"
       Action:
         - "s3:PutObject"
