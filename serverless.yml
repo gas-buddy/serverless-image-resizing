@@ -10,7 +10,7 @@ custom:
 
 provider:
   name: aws
-  runtime: nodejs6.10
+  runtime: nodejs8.10
   environment:
     BUCKET: ${self:custom.${self:provider.stage}.bucket}
     URL: ${self:custom.${self:provider.stage}.url}
@@ -42,13 +42,13 @@ provider:
 package:
   include:
     - index.js
-#  exclude:
-#    - docker/**
+  exclude:
+    - docker/**
 
 functions:
   dynamicResize:
     handler: index.handler
-    Runtime: nodejs6.10
+    Runtime: nodejs8.10
     MemorySize: 1536
     Timeout: 60
     Environment:
