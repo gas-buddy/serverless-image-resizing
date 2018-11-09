@@ -40,7 +40,7 @@ exports.handler = async (event, context, callback) => {
     });
     return;
   }
-  
+
   try {
     const data = await S3.getObject({ Bucket: BUCKET, Key: originalKey }).promise();
     // eslint-disable-next-line new-cap
@@ -66,7 +66,17 @@ exports.handler = async (event, context, callback) => {
       },
       body: '',
     });
-  } catch (err) {
-    callback(err);
-  }
-};
+  } catch (err) { 
+     if (err.code === 'AccessDenied' || err.code === 'NoSuchKey' ) {
+        callback(null, {
+          statusCode: '404',
+          headers: {},
+          body: '',
+        });
+        console.log(`Original image ${originalKey} not found`);
+      }
+      else {
+        callback(err);
+      }
+    }
+}
