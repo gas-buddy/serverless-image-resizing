@@ -19,6 +19,14 @@ if (process.env.ALLOWED_DIMENSIONS) {
 exports.handler = function handler(event, context, callback) {
   const key = event.queryStringParameters.key;
   const match = key.match(/((\d+|auto)x(\d+|auto))\/(.*)/);
+  if (!match) {
+    callback(null, {
+      statusCode: '404',
+      headers: {},
+      body: '',
+    });
+    return;
+  }
   const dimensions = match[1];
   const width = match[2] === 'auto' ? null : Math.min(parseInt(match[2], 10), MAX_SIZE);
   const height = match[3] === 'auto' ? null : Math.min(parseInt(match[3], 10), MAX_SIZE);
@@ -26,13 +34,13 @@ exports.handler = function handler(event, context, callback) {
 
   if (ALLOWED_DIMENSIONS.size > 0 && !ALLOWED_DIMENSIONS.has(dimensions)) {
     callback(null, {
-      statusCode: '400',
+      statusCode: '404',
       headers: {},
       body: '',
     });
     return;
   }
-
+  
   S3.getObject({ Bucket: BUCKET, Key: originalKey }).promise()
     // eslint-disable-next-line new-cap
     .then(data => Sharp(data.Body)
@@ -40,13 +48,15 @@ exports.handler = function handler(event, context, callback) {
       .toFormat('png')
       .toBuffer()
     )
-    .then(buffer => S3.putObject({
-      Body: buffer,
-      Bucket: BUCKET,
-      ContentType: 'image/png',
-      Key: key,
-      CacheControl: `max-age=${MAX_AGE}`,
+    .then(buffer => { 
+      S3.putObject({
+        Body: buffer,
+        Bucket: BUCKET,
+        ContentType: 'image/png',
+        Key: key,
+        CacheControl: `max-age=${MAX_AGE}`,
     }).promise()
+    }
     )
     .then(() => callback(null, {
       statusCode: '301',

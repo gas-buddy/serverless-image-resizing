@@ -6,7 +6,7 @@ custom:
     bucket: gb-images-stg
   prod:
     url: 'https://images.gasbuddy.io'
-    bucket: gb-images-prod
+    bucket: gasbuddy-dynamic-images
 
 provider:
   name: aws
@@ -38,7 +38,6 @@ provider:
           - ""
           - - "arn:aws:s3:::"
             - "${self:provider.environment.BUCKET}/*"
-            - "/*"
 
 package:
   include:
