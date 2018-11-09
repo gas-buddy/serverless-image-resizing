@@ -16,7 +16,7 @@ if (process.env.ALLOWED_DIMENSIONS) {
   dimensions.forEach(dimension => ALLOWED_DIMENSIONS.add(dimension));
 }
 
-exports.handler = function handler(event, context, callback) {
+exports.handler = async (event, context, callback) => {
   const key = event.queryStringParameters.key;
   const match = key.match(/((\d+|auto)x(\d+|auto))\/(.*)/);
   if (!match) {
@@ -41,24 +41,22 @@ exports.handler = function handler(event, context, callback) {
     return;
   }
   
-  S3.getObject({ Bucket: BUCKET, Key: originalKey }).promise()
+  try {
+    const data = await S3.getObject({ Bucket: BUCKET, Key: originalKey }).promise();
     // eslint-disable-next-line new-cap
-    .then(data => Sharp(data.Body)
+    const buffer = await Sharp(data.Body)
       .resize(width, height)
       .toFormat('png')
-      .toBuffer()
-    )
-    .then(buffer => { 
-      S3.putObject({
-        Body: buffer,
-        Bucket: BUCKET,
-        ContentType: 'image/png',
-        Key: key,
-        CacheControl: `max-age=${MAX_AGE}`,
-    }).promise()
-    }
-    )
-    .then(() => callback(null, {
+      .toBuffer();
+    await S3.putObject({
+      Body: buffer,
+      Bucket: BUCKET,
+      ContentType: 'image/png',
+      Key: key,
+      CacheControl: `max-age=${MAX_AGE}`,
+    }).promise();
+  
+    callback(null, {
       statusCode: '301',
       headers: {
         location: `${URL}/${key}`,
@@ -67,7 +65,8 @@ exports.handler = function handler(event, context, callback) {
         Expires: '0',
       },
       body: '',
-    })
-  )
-  .catch(err => callback(err));
+    });
+  } catch (err) {
+    callback(err);
+  }
 };
