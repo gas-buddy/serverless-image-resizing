@@ -8,7 +8,7 @@ const S3 = new AWS.S3({
 const BUCKET = process.env.BUCKET;
 const URL = process.env.URL;
 const ALLOWED_DIMENSIONS = new Set();
-const MAX_AGE = 14400; // seconds = 240 minutes = 4 hours
+const MAX_AGE = 31536000; // seconds = 1 year
 const MAX_SIZE = 10000; // 10 thousand pixels (wide or high)
 
 if (process.env.ALLOWED_DIMENSIONS) {
@@ -30,7 +30,11 @@ exports.handler = async (event, context, callback) => {
   const dimensions = match[1];
   const width = match[2] === 'auto' ? null : Math.min(parseInt(match[2], 10), MAX_SIZE);
   const height = match[3] === 'auto' ? null : Math.min(parseInt(match[3], 10), MAX_SIZE);
-  const originalKey = match[4];
+  let originalKey = match[4];
+
+  if (originalKey.includes('?')) {
+    originalKey = match[4].split('?')[0]
+  }
 
   if (ALLOWED_DIMENSIONS.size > 0 && !ALLOWED_DIMENSIONS.has(dimensions)) {
     callback(null, {
