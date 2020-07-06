@@ -62,7 +62,7 @@ exports.handler = async (event, context, callback) => {
     callback(null, {
       statusCode: '301',
       headers: {
-        location: `${URL}/${originalKey}`,
+        location: `${URL}/${key}`,
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         Pragma: 'no-cache',
         Expires: '0',
