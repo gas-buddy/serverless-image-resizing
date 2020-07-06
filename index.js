@@ -17,7 +17,10 @@ if (process.env.ALLOWED_DIMENSIONS) {
 }
 
 exports.handler = async (event, context, callback) => {
-  const key = event.queryStringParameters.key;
+  let key = event.queryStringParameters.key;
+  if (key.includes('?')) {
+    key = key.split('?')[0];
+  }
   const match = key.match(/((\d+|auto)x(\d+|auto))\/(.*)/);
   if (!match) {
     callback(null, {
@@ -30,12 +33,8 @@ exports.handler = async (event, context, callback) => {
   const dimensions = match[1];
   const width = match[2] === 'auto' ? null : Math.min(parseInt(match[2], 10), MAX_SIZE);
   const height = match[3] === 'auto' ? null : Math.min(parseInt(match[3], 10), MAX_SIZE);
-  let originalKey = match[4];
-
-  if (originalKey.includes('?')) {
-    originalKey = match[4].split('?')[0]
-  }
-
+  const originalKey = match[4];
+  
   if (ALLOWED_DIMENSIONS.size > 0 && !ALLOWED_DIMENSIONS.has(dimensions)) {
     callback(null, {
       statusCode: '404',
@@ -63,7 +62,7 @@ exports.handler = async (event, context, callback) => {
     callback(null, {
       statusCode: '301',
       headers: {
-        location: `${URL}/${key}`,
+        location: `${URL}/${originalKey}`,
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         Pragma: 'no-cache',
         Expires: '0',
@@ -80,6 +79,7 @@ exports.handler = async (event, context, callback) => {
         console.log(`Original image ${originalKey} not found`);
       }
       else {
+        console.log(`Error ${JSON.stringify(err)}`);
         callback(err);
       }
     }
